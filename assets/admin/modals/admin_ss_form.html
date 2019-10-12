@@ -1,0 +1,49 @@
+<div>
+<form id="admin-ss-form" method="POST">
+	{% set vars = namespace(attr_type="number") %}
+	<input type="hidden" name="id">
+	<div class="form-group">
+		<label for="name">Split Based on:</label>
+		<select class="form-control" id="field-type" name="attr_id">
+			<option value="-1" data-type="number" {% if key|string() == '-1' %}{% set vars.attr_type = "number" %}selected{% endif %}>
+				Team size
+			</option>
+			<option value="-2" data-type="text" {% if key|string() ==  '-2' %}{% set vars.attr_type = "text" %}selected{% endif %}>
+				Country
+			</option>
+			<option value="-3" data-type="text" {% if key|string() == '-3' %}{% set vars.attr_type = "text" %}selected{% endif %}>
+				Affiliation
+			</option>
+			{% for attr in attributes %}
+				<option value="{{ attr.id }}" data-type="{{ attr.type }}" {% if attr.id == key %}{% set vars.attr_type = attr.type %}selected{% endif %}>
+					{{ attr.name }}
+				</option>
+			{% endfor %}
+		</select>
+	</div>
+	<div class="form-group" id="field-value">
+		<label for="value">Matching Value</label>
+		<input type="text" disabled/>
+	</div>
+	<div class="form-group">
+		<div class="form-check form-check-inline">
+			<input class="form-check-input" type="checkbox" name="custom" id="custom-checkbox"
+				   {% if custom is defined and custom %}checked{% endif %}>
+			<label class="form-check-label" for="custom-checkbox">Allow custom scoreboard</label>
+		</div>
+	</div>
+
+	<div id="results">
+
+	</div>
+	<button id="update-split" type="submit" class="btn btn-primary btn-outlined float-right modal-action">
+		Submit
+	</button>
+</form>
+<script>
+	var attr_value = "{{ value }}";
+	var attr_id = "{{ key }}";
+	var attr_type = "{% if vars.attr_type %}{{ vars.attr_type }}{% endif %}";
+</script>
+<script src="/plugins/CTFd_Split_Scoreboard/assets/admin/js/admin_ss_form.js" defer='defer'></script>
+</div>

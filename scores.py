@@ -231,10 +231,10 @@ def get_matched_standings(count=None, admin=False):
 
     attr_id = get_config("split_scoreboard_attr", 0)
     attr_value = get_config("split_scoreboard_value", "hidden")
-    teams = IntersectionTeamAttr.query.filter_by(
-            attr_id = attr_id
-        ).filter_by(
-            value = attr_value
+    teams = IntersectionTeamAttr.query.filter(
+            IntersectionTeamAttr.attr_id == attr_id
+        ).filter(
+            IntersectionTeamAttr.value == attr_value
         )
     team_ids = []
     for team in teams:

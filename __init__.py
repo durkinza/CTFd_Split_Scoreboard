@@ -12,14 +12,14 @@ def load(app):
 	##app.db.create_all()
 	# get plugin location
 	dir_path = os.path.dirname(os.path.realpath(__file__))
-	##register_plugin_assets_directory(app, base_path="/plugins/CTFd_Split_Scoreboard/assets/")
+	register_plugin_assets_directory(app, base_path="/plugins/CTFd_Split_Scoreboard/assets/")
 
 	# Admin Pages 
 	##override_template('view_attributes.html', open(os.path.join(dir_path, 'assets/admin/view_attributes.html')).read())
 	override_template('split_scoreboard_attr.html', open(os.path.join(dir_path, 'assets/admin/split_scoreboard_attr.html')).read())
 
 	# Admin Modals
-	##override_template('attribute_form.html', open(os.path.join(dir_path, 'assets/admin/modals/attribute_form.html')).read())
+	override_template('admin_ss_form.html', open(os.path.join(dir_path, 'assets/admin/modals/admin_ss_form.html')).read())
 
 
 	# Team settings page override
