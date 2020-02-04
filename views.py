@@ -27,8 +27,8 @@ def view_split_scoreboard():
     watching = session.get('teams_watching')
 
 
-    selected_value = get_config("split_scoreboard_value")
-    selected_attr_id = get_config("split_scoreboard_attr")
+    selected_value = get_config("split_scoreboard_value") if get_config("split_scoreboard_value") != None else 1
+    selected_attr_id = get_config("split_scoreboard_attr") if get_config("split_scoreboard_attr") != None else -1
 	
     if int(selected_attr_id) > 0:
         attr_name = Attributes.query.filter_by(id=selected_attr_id).first_or_404()

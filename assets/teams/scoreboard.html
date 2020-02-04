@@ -203,13 +203,14 @@
 {% endblock %}
 
 {% block scripts %}
-	<script src="{{ url_for('views.themes', path='js/vendor/plotly.min.js') }}"></script>
-	<script src="{{ url_for('views.themes', path='js/utils.js') }}"></script>
+	<script defer src="{{ url_for('views.themes', path='js/plotly.bundle.js') }}"></script>
 	<script>
 	var matched_name = "{{attr_name}}";
 	</script>	
-	<script src="/plugins/CTFd_Split_Scoreboard/assets/teams/js/chosen.jquery.min.js"></script>
-	<script src="/plugins/CTFd_Split_Scoreboard/assets/teams/js/scoreboard.js"></script>
+	<script defer src="/plugins/CTFd_Split_Scoreboard/assets/teams/js/moment-with-locals.min.js"></script>
+	<script defer src="/plugins/CTFd_Split_Scoreboard/assets/teams/js/plotly-latest.min.js"></script>
+	<script defer src="/plugins/CTFd_Split_Scoreboard/assets/teams/js/chosen.jquery.min.js"></script>
+	<script defer src="/plugins/CTFd_Split_Scoreboard/assets/teams/js/scoreboard.js"></script>
 
 {% endblock %}
 

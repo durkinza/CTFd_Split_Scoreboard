@@ -1,5 +1,19 @@
+
+function colorhash(str) {
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  var colour = "#";
+  for (var i = 0; i < 3; i++) {
+    var value = (hash >> (i * 8)) & 0xff;
+    colour += ("00" + value.toString(16)).substr(-2);
+  }
+  return colour;
+}
+
 function updatescores () {
-  $.get(script_root + '/api/v1/split_scores', function( response ) {
+  $.get(CTFd.config.urlRoot + '/api/v1/split_scores', function( response ) {
     var teams = $.parseJSON(JSON.stringify(response.data));
     drawscores('matched', teams);
     drawscores('unmatched', teams);
@@ -13,7 +27,7 @@ function drawscores(tab, teams){
   for (var i = 0; i < teams['standings_'+tab].length; i++) {
       var row="<tr>\n" +
           "<th scope=\"row\" class=\"text-center\">{0}</th>".format(i + 1) +
-          "<td><a href=\"{0}/team/{1}\">{2}</a></td>".format(script_root, teams['standings_'+tab][i].id, htmlentities(teams['standings_'+tab][i].team)) +
+          "<td><a href=\"{0}/team/{1}\">{2}</a></td>".format(CTFd.config.urlRoot, teams['standings_'+tab][i].id, htmlentities(teams['standings_'+tab][i].team)) +
           "<td>{0}</td>".format(teams['standings_'+tab][i].score) +
           "</tr>";
 
@@ -111,7 +125,7 @@ function scoregraph (tab, response) {
 
 function update(){
   updatescores();
-  $.get(script_root + '/api/v1/split_scores/top/10', function( response ) {
+  $.get(CTFd.config.urlRoot + '/api/v1/split_scores/top/10', function( response ) {
 	scoregraph('matched', response);
 	scoregraph('unmatched', response);
 	scoregraph('custom', response);
@@ -119,7 +133,7 @@ function update(){
 }
 
 setInterval(update, 300000); // Update scores every 5 minutes
-$.get(script_root + '/api/v1/split_scores/top/10', function( response ) {
+$.get(CTFd.config.urlRoot + '/api/v1/split_scores/top/10', function( response ) {
 	scoregraph('matched', response);  // once for students
 	scoregraph('unmatched', response); // once for non-students
 	scoregraph('custom', response); // once for custom

@@ -1,0 +1,26 @@
+# remove mac files
+.DS_Store
+*.DS_Store
+
+# Byte-compiled / optimezed / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+env/
+.env/
+build/
+
+# Installer-logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# pyenv
+.python-version
+
+# etc.
+*swp
+*.retry
+.ropeproject

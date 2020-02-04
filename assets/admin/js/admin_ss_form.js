@@ -1,10 +1,19 @@
 var input, input_box, fields;
+function defer(method) {
+	// wait for jquery to be included
+    if (window.$) {
+        method();
+    } else {
+        setTimeout(function() { defer(method) }, 50);
+    }
+}
+
 /* // prefilled variables
 	attr_value	// holds the matching value
 	attr_id		// holds the attribute id
 	attr_type	// holds the input type
 */
-$(document).ready(function(){
+defer(function(){
 	console.log("ready");
 	input_box = $("#field-value");
 	fields = $("#field-type");
@@ -34,7 +43,7 @@ $(document).ready(function(){
 		})
 		.then(function(response) {
 			if (response.success) {
-				window.location = script_root + "/admin/splitscoreboard";
+				window.location = CTFd.config.urlRoot + "/admin/splitscoreboard";
 			} else {
 				$("#admin-ss-form > #results").empty();
 				Object.keys(response.errors).forEach(function(key, index) {
