@@ -150,7 +150,9 @@
                             {% endif %}
                         {% endfor %}
                     </select>
-                    <input type="hidden" name="nonce" value="{{ nonce }}">
+					{% with form = Forms.self.BaseForm() %}
+					{{ form.nonce() }}
+					{% endwith %}
                     <button type="submit" id="submit" class="btn btn-md btn-primary btn-outlined float-right">Select</button>
                 </form>
             </div>

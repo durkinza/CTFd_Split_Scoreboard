@@ -1,4 +1,4 @@
-from flask_restplus import Namespace, Resource
+from flask_restx import Namespace, Resource
 from flask import session, jsonify, request, abort
 
 from CTFd.models import Solves, Awards, Teams
