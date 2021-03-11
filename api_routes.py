@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource
 from flask import session, jsonify, request, abort
 
-from CTFd.models import Solves, Awards, Teams
+from CTFd.models import Solves, Awards, Teams, Fields
 from CTFd.cache import cache, make_cache_key
 from CTFd.utils import get_config, set_config
 from CTFd.utils.user import get_current_team, authed, is_admin
@@ -21,8 +21,6 @@ from CTFd.utils.config.visibility import (
 )
 from sqlalchemy.sql import or_, and_, any_
 
-from CTFd.plugins.CTFd_Team_Attributes.db_tables import db, Attributes, IntersectionTeamAttr
-from CTFd.plugins.CTFd_Team_Attributes.schemas import AttributesSchema, IntersectionTeamAttrSchema
 from .scores import get_unmatched_standings, get_matched_standings, get_custom_standings
 
 split_scores_namespace = Namespace('split scoreboard', description="Endpoint to retrieve Team Attributes")
@@ -275,8 +273,16 @@ class SplitScoresList(Resource):
 	def post(self):
 		
 		req = request.get_json()
+		attr = Fields.query.filter_by(id = req['attr_id']).first()
+		if( attr.field_type == 'boolean' ):
+			if( req['value'] ):
+				value = 'true'
+			else:
+				value = 'false'
+		else:
+			value = req['value']
 			
-		set_config("split_scoreboard_value", req["value"])
+		set_config("split_scoreboard_value", value)
 		set_config("split_scoreboard_attr", req['attr_id'])
 		set_config("split_scoreboard_custom", req['custom'])
 

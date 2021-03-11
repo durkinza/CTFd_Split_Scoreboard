@@ -3,12 +3,9 @@ from flask import render_template, Blueprint, redirect, url_for, request, sessio
 from CTFd.utils import config
 from CTFd.utils import get_config
 from CTFd.utils.decorators.visibility import check_score_visibility
-from CTFd.models import Teams
+from CTFd.models import Teams, Fields
 from CTFd.schemas.teams import TeamSchema
-from CTFd.plugins.CTFd_Team_Attributes.db_tables import Attributes, IntersectionTeamAttr
 from .scores import get_unmatched_standings, get_matched_standings, get_custom_standings
-import copy
-
 
 @app.route('/scoreboard', methods=['GET', 'POST'])
 @check_score_visibility
@@ -31,7 +28,7 @@ def view_split_scoreboard():
     selected_attr_id = get_config("split_scoreboard_attr") if get_config("split_scoreboard_attr") != None else -1
 	
     if int(selected_attr_id) > 0:
-        attr_name = Attributes.query.filter_by(id=selected_attr_id).first_or_404()
+        attr_name = Fields.query.filter_by(id=selected_attr_id).first_or_404()
         attr_name = attr_name.name
     elif int(selected_attr_id) == -1:
         attr_name = "Matching Team Size"

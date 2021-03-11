@@ -1,12 +1,11 @@
 from sqlalchemy.sql.expression import union_all
+from sqlalchemy import func
 
 from CTFd.cache import cache
-from CTFd.models import db, Teams, Users, Solves, Awards, Challenges
+from CTFd.models import db, Teams, Users, Solves, Awards, Challenges, TeamFieldEntries, Fields
 from CTFd.utils.dates import unix_time_to_utc
 from CTFd.utils import get_config
 from CTFd.utils.modes import get_model
-from CTFd.plugins.CTFd_Team_Attributes.db_tables import Attributes, IntersectionTeamAttr
-
 
 @cache.memoize(timeout=60)
 def get_unmatched_standings(count=None, admin=False):
@@ -20,16 +19,15 @@ def get_unmatched_standings(count=None, admin=False):
     Model = get_model()
     attr_id = get_config("split_scoreboard_attr", 0)
     attr_value = get_config("split_scoreboard_value", "hidden")
-    teams = IntersectionTeamAttr.query.filter_by(
-        attr_id = attr_id
-    ).filter_by(
-        value = attr_value
+    teams = TeamFieldEntries.query.filter_by(
+        field_id = attr_id
+    ).filter(
+        func.lower(TeamFieldEntries.value) == func.lower(str(attr_value))
     )
+
     team_ids = []
     for team in teams:
         team_ids.append(team.team_id)
-
-
 
     scores = (
         db.session.query(
@@ -227,15 +225,16 @@ def get_custom_standings(count=None, admin=False, team_ids=[]):
 
 @cache.memoize(timeout=60)
 def get_matched_standings(count=None, admin=False):
+    
     Model = get_model()
-
     attr_id = get_config("split_scoreboard_attr", 0)
     attr_value = get_config("split_scoreboard_value", "hidden")
-    teams = IntersectionTeamAttr.query.filter(
-            IntersectionTeamAttr.attr_id == attr_id
-        ).filter(
-            IntersectionTeamAttr.value == attr_value
-        )
+    teams = TeamFieldEntries.query.filter_by(
+        field_id = attr_id
+    ).filter(
+        func.lower(TeamFieldEntries.value) == func.lower(str(attr_value))
+    )
+
     team_ids = []
     for team in teams:
         team_ids.append(team.team_id)
