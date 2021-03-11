@@ -3,11 +3,6 @@
 Splits the scoreboard by the selected attribute.
 
 
-## Dependencies
-
-This plugin requires the [CTFd_Team_Attributes plugin](https://github.com/durkinza/CTFd_Team_Attributes).
-
-
 ## Admin Interface
 
 ![Admins split scoreboard interfcae](imgs/Admin-page.png)
@@ -16,7 +11,6 @@ Admins can pick which attribute of the teams they wish to split the scoreboard o
 Admins can decide if they wish to offer the custom scoreboard tab. This tab will allow users to select the teams they want to see ranked against eachother. This is useful for groups who wish to see how they rank against their peers, such as student teams all competing in the same class room. 
 
 ![Options available](imgs/Options.png)
-
 
 
 
