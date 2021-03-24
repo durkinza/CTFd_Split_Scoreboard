@@ -26,23 +26,27 @@ def view_split_scoreboard():
 
     selected_value = get_config("split_scoreboard_value") if get_config("split_scoreboard_value") != None else 1
     selected_attr_id = get_config("split_scoreboard_attr") if get_config("split_scoreboard_attr") != None else -1
+    selected_attr_matched_title = get_config("split_scoreboard_attr_matched_title") if get_config("split_scoreboard_attr_matched_title") != None else "matched"
+    selected_attr_unmatched_title = get_config("split_scoreboard_attr_unmatched_title") if get_config("split_scoreboard_attr_unmatched_title") != None else "unmatched"
+
 	
     if int(selected_attr_id) > 0:
         attr_name = Fields.query.filter_by(id=selected_attr_id).first_or_404()
         attr_name = attr_name.name
     elif int(selected_attr_id) == -1:
-        attr_name = "Matching Team Size"
+        attr_name = "Team Size is "+str(selected_value)
     elif int(selected_attr_id) == -2:
-        attr_name = "Matching Country"
+        attr_name = "Team Size is less than "+str(selected_value)
     elif int(selected_attr_id) == -3:
-        attr_name = "Matching Affiliation"
+        attr_name = "Team Size is greater than "+str(selected_value)
 	
     show_custom = get_config("split_scoreboard_custom")
     return render_template(
        'scoreboard.html',
 		custom = show_custom,
         teams = teams,
-		attr_name = attr_name,
+		matched_title = selected_attr_matched_title,
+		unmatched_title = selected_attr_unmatched_title,
         watching = watching,
         matched_standings = matched_standings,
         unmatched_standings = unmatched_standings,

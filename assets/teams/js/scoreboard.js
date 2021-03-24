@@ -100,7 +100,7 @@ function scoregraph (tab, response) {
 
         var layout = {
 			
-            title: 'Top 10 '+(tab == 'matched'?matched_name:tab == 'unmatched'?'Non-'+matched_name:'Custom')+' Teams',
+            title: 'Top 10 '+(tab == 'matched'?matched_name:tab == 'unmatched'?unmatched_name:'Custom')+' Teams',
             paper_bgcolor: 'rgba(0,0,0,0)',
             plot_bgcolor: 'rgba(0,0,0,0)',
             hovermode: 'closest',
@@ -134,8 +134,8 @@ function update(){
 
 setInterval(update, 300000); // Update scores every 5 minutes
 $.get(CTFd.config.urlRoot + '/api/v1/split_scores/top/10', function( response ) {
-	scoregraph('matched', response);  // once for students
-	scoregraph('unmatched', response); // once for non-students
+	scoregraph('matched', response);  // once for matching teams
+	scoregraph('unmatched', response); // once for non-matching teams
 	scoregraph('custom', response); // once for custom
 });
 

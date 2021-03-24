@@ -9,10 +9,10 @@
 				Team size
 			</option>
 			<option value="-2" data-type="text" {% if key|string() ==  '-2' %}{% set vars.attr_type = "text" %}selected{% endif %}>
-				Country
+				Team size less than
 			</option>
 			<option value="-3" data-type="text" {% if key|string() == '-3' %}{% set vars.attr_type = "text" %}selected{% endif %}>
-				Affiliation
+				Team size greater than
 			</option>
 			{% for attr in attributes %}
 				<option value="{{ attr.id }}" data-type="{{ attr.type }}" {% if attr.id == key %}{% set vars.attr_type = attr.type %}selected{% endif %}>
@@ -24,6 +24,14 @@
 	<div class="form-group" id="field-value">
 		<label for="value">Matching Value</label>
 		<input type="text" disabled/>
+	</div>
+	<div class="form-group" id="field-matched-title" >
+		<label for="value">Matching Title</label>
+		<input type="text" value="{{ matched_title }}" name="attr_matched_title"/>
+	</div>
+	<div class="form-group" id="field-unmatched-title">
+		<label for="value">Unmatching Title</label>
+		<input type="text" value="{{ unmatched_title }}"  name="attr_unmatched_title"/>
 	</div>
 	<div class="form-group">
 		<div class="form-check form-check-inline">
@@ -44,6 +52,8 @@
 	var attr_value = "{{ value }}";
 	var attr_id = "{{ key }}";
 	var attr_type = "{% if vars.attr_type %}{{ vars.attr_type }}{% endif %}";
+	var attr_matched_title = "{{ matched_title }}";
+	var attr_unmatched_title = "{{ unmatched_title }}";
 </script>
 <script src="/plugins/CTFd_Split_Scoreboard/assets/admin/js/admin_ss_form.js" defer='defer'></script>
 </div>

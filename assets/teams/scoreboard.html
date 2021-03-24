@@ -28,10 +28,10 @@
 
     <ul class="nav nav-tabs" id="myTab" role="tablist">
         <li class="nav-item">
-            <a class="nav-link active" id="tab-matched" data-toggle="tab" href="#matched" role="tab" aria-controls="matched" aria-selected="true">{{attr_name}}</a>
+            <a class="nav-link active" id="tab-matched" data-toggle="tab" href="#matched" role="tab" aria-controls="matched" aria-selected="true">{{matched_title}}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="tab-unmatched" data-toggle="tab" href="#unmatched" role="tab" aria-controls="unmatched" aria-selected="false">General</a>
+            <a class="nav-link" id="tab-unmatched" data-toggle="tab" href="#unmatched" role="tab" aria-controls="unmatched" aria-selected="false">{{unmatched_title}}</a>
         </li>
 		{% if custom is defined and custom == True %}
         <li class="nav-item">
@@ -43,7 +43,7 @@
 
     <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="matched" role="tabpanel" aria-labelledby="tab-matched">
-            <h2 class="text-center scoreboardName">{{attr_name}} Scoreboard</h2>
+            <h2 class="text-center scoreboardName">{{matched_title}} Scoreboard</h2>
             <div id="score-graph-matched" class="row">
                 <div id="score-matched" class="col-md-12 text-center">
                     <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
@@ -90,7 +90,7 @@
         </div>
 
         <div class="tab-pane fade" id="unmatched" role="tabpanel" aria-labelledby="tab-unmatched">
-            <h2 class="text-center scoreboardName">Non-{{attr_name}} Scoreboard</h2>
+            <h2 class="text-center scoreboardName">{{unmatched_title}} Scoreboard</h2>
             <div id="score-graph-unmatched" class="row">
                 <div id="score-unmatched" class="col-md-12 text-center">
                     <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
@@ -207,7 +207,8 @@
 {% block scripts %}
 	<script defer src="{{ url_for('views.themes', path='js/plotly.bundle.js') }}"></script>
 	<script>
-	var matched_name = "{{attr_name}}";
+	var matched_name = "{{matched_title}}";
+	var unmatched_name = "{{unmatched_title}}";
 	</script>	
 	<script defer src="/plugins/CTFd_Split_Scoreboard/assets/teams/js/moment-with-locals.min.js"></script>
 	<script defer src="/plugins/CTFd_Split_Scoreboard/assets/teams/js/plotly-latest.min.js"></script>

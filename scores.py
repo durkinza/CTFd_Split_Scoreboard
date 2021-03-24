@@ -8,7 +8,91 @@ from CTFd.utils import get_config
 from CTFd.utils.modes import get_model
 
 @cache.memoize(timeout=60)
-def get_unmatched_standings(count=None, admin=False):
+def get_team_ids():
+    attr_id = get_config("split_scoreboard_attr", 0)
+    attr_value = get_config("split_scoreboard_value", "hidden")
+
+    team_ids = []
+    if attr_id == "-1": # Where team size is <value>
+        teams = Teams.query.outerjoin(Teams.members).group_by(Teams).having(func.count_(Teams.members) == attr_value)
+        for team in teams:
+            team_ids.append(team.id)
+    elif attr_id == "-2": # Where team size is less than <value> 
+        teams = Teams.query.outerjoin(Teams.members).group_by(Teams).having(func.count_(Teams.members) <= attr_value)
+        for team in teams:
+            team_ids.append(team.id)
+    elif attr_id == "-3": # Where team size is greater than <value> 
+        teams = Teams.query.outerjoin(Teams.members).group_by(Teams).having(func.count_(Teams.members) >= attr_value)
+        for team in teams:
+            team_ids.append(team.id)
+    else:
+        teams = TeamFieldEntries.query.filter_by(
+            field_id = attr_id
+        ).filter(
+            func.lower(TeamFieldEntries.value) == func.lower(str(attr_value))
+        )
+        for team in teams:
+            team_ids.append(team.team_id)
+
+    return team_ids
+
+
+#@cache.memoize(timeout=60)
+def get_scores(admin=False):
+    scores = (
+        db.session.query(
+            Solves.account_id.label("account_id"),
+            db.func.sum(Challenges.value).label("score"),
+            db.func.max(Solves.id).label("id"),
+            db.func.max(Solves.date).label("date"),
+        )
+        .join(Challenges)
+        .filter(Challenges.value != 0)
+        .group_by(Solves.account_id)
+    )
+
+    awards = (
+        db.session.query(
+            Awards.account_id.label("account_id"),
+            db.func.sum(Awards.value).label("score"),
+            db.func.max(Awards.id).label("id"),
+            db.func.max(Awards.date).label("date"),
+        )
+        .filter(Awards.value != 0)
+        .group_by(Awards.account_id)
+    )
+
+    """
+    Filter out solves and awards that are before a specific time point.
+    """
+    freeze = get_config("freeze")
+    if not admin and freeze:
+        scores = scores.filter(Solves.date < unix_time_to_utc(freeze))
+        awards = awards.filter(Awards.date < unix_time_to_utc(freeze))
+
+    """
+    Combine awards and solves with a union. They should have the same amount of columns
+    """
+    results = union_all(scores, awards).alias("results")
+
+    """
+    Sum each of the results by the team id to get their score.
+    """
+    sumscores = (
+        db.session.query(
+            results.columns.account_id,
+            db.func.sum(results.columns.score).label("score"),
+            db.func.max(results.columns.id).label("id"),
+            db.func.max(results.columns.date).label("date"),
+        )
+        .group_by(results.columns.account_id)
+        .subquery()
+    )
+
+    return sumscores
+
+@cache.memoize(timeout=60)
+def get_unmatched_standings(count=None, admin=False, fields=[]):
     """
     Get standings as a list of tuples containing account_id, name, and score e.g. [(account_id, team_name, score)].
     Ties are broken by who reached a given score first based on the solve ID. Two users can have the same score but one
@@ -16,68 +100,11 @@ def get_unmatched_standings(count=None, admin=False):
     Challenges & Awards with a value of zero are filtered out of the calculations to avoid incorrect tie breaks.
     """
 
+    if fields is None:
+        fields = []
     Model = get_model()
-    attr_id = get_config("split_scoreboard_attr", 0)
-    attr_value = get_config("split_scoreboard_value", "hidden")
-    teams = TeamFieldEntries.query.filter_by(
-        field_id = attr_id
-    ).filter(
-        func.lower(TeamFieldEntries.value) == func.lower(str(attr_value))
-    )
-
-    team_ids = []
-    for team in teams:
-        team_ids.append(team.team_id)
-
-    scores = (
-        db.session.query(
-            Solves.account_id.label("account_id"),
-            db.func.sum(Challenges.value).label("score"),
-            db.func.max(Solves.id).label("id"),
-            db.func.max(Solves.date).label("date"),
-        )
-        .join(Challenges)
-        .filter(Challenges.value != 0)
-        .group_by(Solves.account_id)
-    )
-
-    awards = (
-        db.session.query(
-            Awards.account_id.label("account_id"),
-            db.func.sum(Awards.value).label("score"),
-            db.func.max(Awards.id).label("id"),
-            db.func.max(Awards.date).label("date"),
-        )
-        .filter(Awards.value != 0)
-        .group_by(Awards.account_id)
-    )
-
-    """
-    Filter out solves and awards that are before a specific time point.
-    """
-    freeze = get_config("freeze")
-    if not admin and freeze:
-        scores = scores.filter(Solves.date < unix_time_to_utc(freeze))
-        awards = awards.filter(Awards.date < unix_time_to_utc(freeze))
-
-    """
-    Combine awards and solves with a union. They should have the same amount of columns
-    """
-    results = union_all(scores, awards).alias("results")
-
-    """
-    Sum each of the results by the team id to get their score.
-    """
-    sumscores = (
-        db.session.query(
-            results.columns.account_id,
-            db.func.sum(results.columns.score).label("score"),
-            db.func.max(results.columns.id).label("id"),
-            db.func.max(results.columns.date).label("date"),
-        )
-        .group_by(results.columns.account_id)
-        .subquery()
-    )
+    team_ids = get_team_ids()
+    sumscores = get_scores(admin)
 
     """
     Admins can see scores for all users but the public cannot see banned users.
@@ -94,6 +121,7 @@ def get_unmatched_standings(count=None, admin=False):
                 Model.hidden,
                 Model.banned,
                 sumscores.columns.score,
+                *fields,
             )
             .join(sumscores, Model.id == sumscores.columns.account_id)
 			.filter(Model.id.notin_(team_ids))
@@ -106,6 +134,7 @@ def get_unmatched_standings(count=None, admin=False):
                 Model.oauth_id.label("oauth_id"),
                 Model.name.label("name"),
                 sumscores.columns.score,
+                *fields,
             )
             .join(sumscores, Model.id == sumscores.columns.account_id)
             .filter(Model.banned == False, Model.hidden == False)
@@ -124,59 +153,12 @@ def get_unmatched_standings(count=None, admin=False):
     return standings
 
 @cache.memoize(timeout=60)
-def get_custom_standings(count=None, admin=False, team_ids=[]):
+def get_custom_standings(count=None, admin=False, team_ids=[], fields=[]):
 
+    if fields is None:
+        fields = []
     Model = get_model()
-
-    scores = (
-        db.session.query(
-            Solves.account_id.label("account_id"),
-            db.func.sum(Challenges.value).label("score"),
-            db.func.max(Solves.id).label("id"),
-            db.func.max(Solves.date).label("date"),
-        )
-        .join(Challenges)
-        .filter(Challenges.value != 0)
-        .group_by(Solves.account_id)
-    )
-
-    awards = (
-        db.session.query(
-            Awards.account_id.label("account_id"),
-            db.func.sum(Awards.value).label("score"),
-            db.func.max(Awards.id).label("id"),
-            db.func.max(Awards.date).label("date"),
-        )
-        .filter(Awards.value != 0)
-        .group_by(Awards.account_id)
-    )
-
-    """
-    Filter out solves and awards that are before a specific time point.
-    """
-    freeze = get_config("freeze")
-    if not admin and freeze:
-        scores = scores.filter(Solves.date < unix_time_to_utc(freeze))
-        awards = awards.filter(Awards.date < unix_time_to_utc(freeze))
-
-    """
-    Combine awards and solves with a union. They should have the same amount of columns
-    """
-    results = union_all(scores, awards).alias("results")
-
-    """
-    Sum each of the results by the team id to get their score.
-    """
-    sumscores = (
-        db.session.query(
-            results.columns.account_id,
-            db.func.sum(results.columns.score).label("score"),
-            db.func.max(results.columns.id).label("id"),
-            db.func.max(results.columns.date).label("date"),
-        )
-        .group_by(results.columns.account_id)
-        .subquery()
-    )
+    sumscores = get_scores(admin)
 
     """
     Admins can see scores for all users but the public cannot see banned users.
@@ -193,6 +175,7 @@ def get_custom_standings(count=None, admin=False, team_ids=[]):
                 Model.hidden,
                 Model.banned,
                 sumscores.columns.score,
+                *fields,
             )
             .join(sumscores, Model.id == sumscores.columns.account_id)
 			.filter(Model.id.in_(team_ids))
@@ -205,6 +188,7 @@ def get_custom_standings(count=None, admin=False, team_ids=[]):
                 Model.oauth_id.label("oauth_id"),
                 Model.name.label("name"),
                 sumscores.columns.score,
+                *fields,
             )
             .join(sumscores, Model.id == sumscores.columns.account_id)
             .filter(Model.banned == False, Model.hidden == False)
@@ -224,70 +208,13 @@ def get_custom_standings(count=None, admin=False, team_ids=[]):
 
 
 @cache.memoize(timeout=60)
-def get_matched_standings(count=None, admin=False):
+def get_matched_standings(count=None, admin=False, fields=None):
     
+    if fields is None:
+        fields = []
     Model = get_model()
-    attr_id = get_config("split_scoreboard_attr", 0)
-    attr_value = get_config("split_scoreboard_value", "hidden")
-    teams = TeamFieldEntries.query.filter_by(
-        field_id = attr_id
-    ).filter(
-        func.lower(TeamFieldEntries.value) == func.lower(str(attr_value))
-    )
-
-    team_ids = []
-    for team in teams:
-        team_ids.append(team.team_id)
-
-    scores = (
-        db.session.query(
-            Solves.account_id.label("account_id"),
-            db.func.sum(Challenges.value).label("score"),
-            db.func.max(Solves.id).label("id"),
-            db.func.max(Solves.date).label("date"),
-        )
-        .join(Challenges)
-        .filter(Challenges.value != 0)
-        .group_by(Solves.account_id)
-    )
-
-    awards = (
-        db.session.query(
-            Awards.account_id.label("account_id"),
-            db.func.sum(Awards.value).label("score"),
-            db.func.max(Awards.id).label("id"),
-            db.func.max(Awards.date).label("date"),
-        )
-        .filter(Awards.value != 0)
-        .group_by(Awards.account_id)
-    )
-
-    """
-    Filter out solves and awards that are before a specific time point.
-    """
-    freeze = get_config("freeze")
-    if not admin and freeze:
-        scores = scores.filter(Solves.date < unix_time_to_utc(freeze))
-        awards = awards.filter(Awards.date < unix_time_to_utc(freeze))
-
-    """
-    Combine awards and solves with a union. They should have the same amount of columns
-    """
-    results = union_all(scores, awards).alias("results")
-
-    """
-    Sum each of the results by the team id to get their score.
-    """
-    sumscores = (
-        db.session.query(
-            results.columns.account_id,
-            db.func.sum(results.columns.score).label("score"),
-            db.func.max(results.columns.id).label("id"),
-            db.func.max(results.columns.date).label("date"),
-        )
-        .group_by(results.columns.account_id)
-        .subquery()
-    )
+    team_ids = get_team_ids()
+    sumscores = get_scores(admin)
 
     """
     Admins can see scores for all users but the public cannot see banned users.
@@ -304,6 +231,7 @@ def get_matched_standings(count=None, admin=False):
                 Model.hidden,
                 Model.banned,
                 sumscores.columns.score,
+                *fields,
             )
             .join(sumscores, Model.id == sumscores.columns.account_id)
 			.filter(Model.id.in_(team_ids))
@@ -316,6 +244,7 @@ def get_matched_standings(count=None, admin=False):
                 Model.oauth_id.label("oauth_id"),
                 Model.name.label("name"),
                 sumscores.columns.score,
+                *fields,
             )
             .join(sumscores, Model.id == sumscores.columns.account_id)
             .filter(Model.banned == False, Model.hidden == False)

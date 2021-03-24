@@ -17,6 +17,8 @@ defer(function(){
 	console.log("ready");
 	input_box = $("#field-value");
 	fields = $("#field-type");
+	matched_title = $("#field-matched-title");
+	unmatched_title = $("#field-unmatched-title");
 	update_value_type();
 	$("#field-type").on("change", function(){
 	    attr_id = $("#field-type option:selected").val();

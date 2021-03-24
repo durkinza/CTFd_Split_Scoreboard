@@ -13,13 +13,18 @@ def view_scoreboard():
 	selected_key = get_config("split_scoreboard_attr")
 	selected_value = get_config("split_scoreboard_value")
 	show_custom = get_config("split_scoreboard_custom")
+
+	matched_title = get_config("split_scoreboard_attr_matched_title")
+	unmatched_title = get_config("split_scoreboard_attr_unmatched_title")
 	
 	return render_template(
 		"split_scoreboard_attr.html",
 		key = selected_key, 
 		value = selected_value,
 		custom = show_custom,
-		attributes = attributes
+		attributes = attributes,
+		matched_title = matched_title,
+		unmatched_title = unmatched_title,
 	)
 
 

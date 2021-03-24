@@ -264,7 +264,9 @@ class SplitScoresList(Resource):
 			'data': {
 				"value":get_config("split_scoreboard_value"),
 				"attr":get_config("split_scoreboard_attr"),
-				'custom':get_config("split_scoreboard_custom")
+				'custom':get_config("split_scoreboard_custom"),
+				"attr_matched_title":get_config("split_scoreboard_attr_matched_title"),
+				"attr_unmatched_title":get_config("split_scoreboard_attr_unmatched_title"),
 			}
 		}
 		return response
@@ -274,7 +276,7 @@ class SplitScoresList(Resource):
 		
 		req = request.get_json()
 		attr = Fields.query.filter_by(id = req['attr_id']).first()
-		if( attr.field_type == 'boolean' ):
+		if( attr and attr.field_type == 'boolean' ):
 			if( req['value'] ):
 				value = 'true'
 			else:
@@ -285,6 +287,8 @@ class SplitScoresList(Resource):
 		set_config("split_scoreboard_value", value)
 		set_config("split_scoreboard_attr", req['attr_id'])
 		set_config("split_scoreboard_custom", req['custom'])
+		set_config("split_scoreboard_attr_matched_title", req['attr_matched_title'])
+		set_config("split_scoreboard_attr_unmatched_title", req['attr_unmatched_title'])
 
 		response = {
             'success':True,
@@ -292,7 +296,9 @@ class SplitScoresList(Resource):
             'data': {
 				"value":get_config("split_scoreboard_value"),
 				"attr":get_config("split_scoreboard_attr"),
-				'custom':get_config("split_scoreboard_custom")
+				'custom':get_config("split_scoreboard_custom"),
+				"attr_matched_title":get_config("split_scoreboard_attr_matched_title"),
+				"attr_unmatched_title":get_config("split_scoreboard_attr_unmatched_title"),
 			}
         }
 		return response
