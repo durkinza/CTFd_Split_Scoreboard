@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block stylesheets %}
-<link rel="stylesheet" href="/plugins/CTFd_Split_Scoreboard/assets/teams/css/bootstrap-chosen.css"/>
+<link rel="stylesheet" href="{{ url_for('split_scoreboard_assets', path='teams/css/bootstrap-chosen.css') }}"/>
 {% endblock %}
 {% block content %}
 <div class="jumbotron">
@@ -210,10 +210,10 @@
 	var matched_name = "{{matched_title}}";
 	var unmatched_name = "{{unmatched_title}}";
 	</script>	
-	<script defer src="/plugins/CTFd_Split_Scoreboard/assets/teams/js/moment-with-locals.min.js"></script>
-	<script defer src="/plugins/CTFd_Split_Scoreboard/assets/teams/js/plotly-latest.min.js"></script>
-	<script defer src="/plugins/CTFd_Split_Scoreboard/assets/teams/js/chosen.jquery.min.js"></script>
-	<script defer src="/plugins/CTFd_Split_Scoreboard/assets/teams/js/scoreboard.js"></script>
+	<script defer src="{{ url_for('split_scoreboard_assets', path='teams/js/moment-with-locals.min.js') }}"></script>
+	<script defer src="{{ url_for('split_scoreboard_assets', path='teams/js/plotly-latest.min.js') }}"></script>
+	<script defer src="{{ url_for('split_scoreboard_assets', path='teams/js/chosen.jquery.min.js') }}"></script>
+	<script defer src="{{ url_for('split_scoreboard_assets', path='teams/js/scoreboard.js') }}"></script>
 
 {% endblock %}
 

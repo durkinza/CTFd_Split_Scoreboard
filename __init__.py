@@ -11,7 +11,9 @@ from .api_routes import split_scores_namespace
 def load(app):
 	# get plugin location
 	dir_path = os.path.dirname(os.path.realpath(__file__))
-	register_plugin_assets_directory(app, base_path="/plugins/CTFd_Split_Scoreboard/assets/")
+	dir_name = os.path.basename(dir_path)
+
+	register_plugin_assets_directory(app, base_path="/plugins/"+dir_name+"/assets/", endpoint="split_scoreboard_assets")
 
 	# Admin Pages 
 	override_template('split_scoreboard_attr.html', open(os.path.join(dir_path, 'assets/admin/split_scoreboard_attr.html')).read())

@@ -82,7 +82,7 @@ function update_value_type(){
 			break;
 		case "checkbox":
 		default:			
-			input_box.html('<div class="form-check form-check-inline"><label class="form-check-label" for="value">Where value matches:</label><input class="form-check-input" type="checkbox" name="value" id="value" '+(attr_value!=""&&attr_value!="false"&&attr_value!="0"?'checked':'')+'/></div>');
+			input_box.html('<div class="form-check form-check-inline"><label class="form-check-label" for="value">Where value matches:</label><input class="form-check-input" type="checkbox" name="value" id="value" '+(attr_value?'checked':'')+'/></div>');
 	}
 
 	// keep track of the current input value
