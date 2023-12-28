@@ -205,7 +205,8 @@
 {% endblock %}
 
 {% block scripts %}
-	<script async src="{{ url_for('split_scoreboard_assets', path='teams/js/jquery.min.js') }}"></script>
+	<script async src="{{ url_for('views.themes', path='assets/js/core.min.js') }}"></script>
+	<!-- <script async src="{{ url_for('split_scoreboard_assets', path='teams/js/jquery.min.js') }}"></script> -->
 	<script defer src="{{ url_for('views.themes', path='js/plotly.bundle.js') }}"></script>
 	<script>
 	var matched_name = "{{matched_title}}";
